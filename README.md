@@ -67,6 +67,11 @@ pip install -r requirements.txt
 # Executar o Jupyter Notebook
 jupyter notebook notebooks/videogame_sales.ipynb
 
+## Lições Aprendidas
+
+- Prática extensiva das bibliotecas Pandas e Matplot
+- Estruturação de análise de dados e prática de **storytelling**
+
 > Desenvolvido por Bruno Casini  
 > Contato: kzini1701@gmail.com
 > LinkedIn:Em construção
