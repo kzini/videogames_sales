@@ -17,12 +17,13 @@ nos mercados norte-americano e japonês, explorando como preferências culturais
 - Impacto de exclusivos por plataforma
 - Distribuição por classificação etária
 
-## Tecnologias Utilizadas
+## Tecnologias utilizadas
 - **Linguagem:** Python 3.12  
 - **Bibliotecas principais:** pandas, matplotlib, seaborn
 
-## Estrutura do Projeto
+## Estrutura do projeto
 
+```
 videogames_sales/
 ├── data/
 │ └── Video_Games.csv
@@ -33,6 +34,7 @@ videogames_sales/
 ├── notebooks/
 │ └── videogame_sales.ipynb
 └── README.md
+```
 
 ## Principais Resultados
 
@@ -41,7 +43,7 @@ videogames_sales/
 - Publishers ocidentais (EA, Activision, Ubisoft) dominam  
 - Xbox 360 liderou as vendas  
 
-### Mercado Japonês
+### Mercado japonês
 - Forte apelo de RPGs japoneses  
 - Publishers japonesas (Nintendo, Square Enix, Capcom) dominaram  
 - PS3 e Wii tiveram melhor desempenho  
