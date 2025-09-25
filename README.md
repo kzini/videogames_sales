@@ -56,21 +56,25 @@ videogames_sales/
 ### Diferenças intrigênero  
 - Preferências distintas de cada mercado mesmo em gêneros populares em ambas regiões.
 
-## Lições Aprendidas
+## Lições aprendidas
 
 - Prática extensiva das bibliotecas Pandas e Matplot
 - Estruturação de análise de dados e prática de storytelling
 
-## Como Executar
+## Como reproduzir
+
+1. Clone o repositório:
 ```bash
-# Clonar o repositório
-git clone https://github.com/kzini/videogames_sales
+git clone https://github.com/kzini/videogames_sales.git
+cd videogames_sales
+```
 
-# Instalar dependências
+2. Instale as dependências:
+```bash
 pip install -r requirements.txt
+```
 
-# Executar o Jupyter Notebook
-jupyter notebook notebooks/videogame_sales.ipynb
+3. Execute videogame_sales.ipynb na pasta `notebooks/` para reproduzir os experimentos.
 
 > Desenvolvido por Bruno Casini  
 > Contato: kzini1701@gmail.com
