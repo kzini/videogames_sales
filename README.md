@@ -36,16 +36,16 @@ videogames_sales/
 └── README.md
 ```
 
-## Principais Resultados
+## Principais resultados
 
-### Mercado Norte-Americano
+### Mercado norte-americano
 - Predomínio de ação, esportes e shooters  
-- Publishers ocidentais (EA, Activision, Ubisoft) dominam  
+- Publishers ocidentais dominam  
 - Xbox 360 liderou as vendas  
 
 ### Mercado japonês
 - Forte apelo de RPGs japoneses  
-- Publishers japonesas (Nintendo, Square Enix, Capcom) dominaram  
+- Publishers japonesas dominaram  
 - PS3 e Wii tiveram melhor desempenho  
 
 ### Performance por plataforma
@@ -77,5 +77,5 @@ pip install -r requirements.txt
 3. Execute videogame_sales.ipynb na pasta `notebooks/` para reproduzir os experimentos.
 
 > Desenvolvido por Bruno Casini  
-> Contato: kzini1701@gmail.com
+> Contato: kzini1701@gmail.com 
 > LinkedIn:Em construção
