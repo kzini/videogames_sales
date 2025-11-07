@@ -1,8 +1,7 @@
 # Análise de vendas da 7ª geração de videogames
 
 ## Objetivo
-Analisar comparativamente as vendas de jogos da sétima geração de consoles (Xbox 360, PlayStation 3 e Nintendo Wii), com foco 
-nos mercados norte-americano e japonês, explorando como preferências culturais e estratégias corporativas se refletem nos dados de vendas.
+Analisar comparativamente, com storytelling,  as vendas de jogos da sétima geração de consoles (Xbox 360, PlayStation 3 e Nintendo Wii), com foco nos mercados norte-americano e japonês, explorando como preferências culturais e estratégias corporativas se refletem nos dados de vendas.
 
 ## Estrutura da Análise
 
@@ -74,8 +73,8 @@ cd videogames_sales
 pip install -r requirements.txt
 ```
 
-3. Execute videogame_sales.ipynb na pasta `notebooks/` para reproduzir os experimentos.
+3. Execute videogame_sales.ipynb na pasta `notebook/` para reproduzir os experimentos.
 
 > Desenvolvido por Bruno Casini  
-> Contato: kzini1701@gmail.com 
-> LinkedIn:Em construção
+> Contato: kzini1701@gmail.com  
+> LinkedIn: www.linkedin.com/in/kzini
