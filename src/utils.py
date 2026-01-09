@@ -1,31 +1,40 @@
+import requests
 import pandas as pd
-from src.constants import year_mapping_gen7, region_prepositions, region_info, color
+from datetime import datetime
+import time
+import os
+from dotenv import load_dotenv
+from src.constants import region_prepositions, region_info, color
 
 def remove_duplicates_per_platform(df, gen):
     df_clean = []
     
     for platform in gen:
-        platform_data = df[df['platform'] == platform]
-        duplicates_before = platform_data['title'].duplicated().sum()
+        platform_data = df[df['platform'] == platform].copy()
         console_name = gen[platform]['console_name']
-
-        print("Número de títulos duplicados na plataforma", console_name,
-              "antes da remoção:", duplicates_before)
-
-        platform_data = platform_data.drop_duplicates(subset=['title'], keep='first')
-        duplicates_after = platform_data['title'].duplicated().sum()
-
-        print("Número de títulos duplicados na plataforma",
-              console_name, "após a remoção:", duplicates_after)
-        print("")
-
+        
+        print(f"\n{console_name}:")
+        print(f"  Linhas antes: {len(platform_data)}")
+        
+        duplicates_before = platform_data.duplicated().sum()
+        platform_data = platform_data.drop_duplicates(keep='first')
+        duplicates_after = platform_data.duplicated().sum()
+        
+        print(f"  Duplicatas exatas removidas: {duplicates_before}")
+        print(f"  Linhas depois: {len(platform_data)}")
+        
+        titulos_dups = platform_data['title'].duplicated().sum()
+        if titulos_dups > 0:
+            print(f"{titulos_dups} títulos ainda duplicados")
+            dup_titles = platform_data[platform_data['title'].duplicated(keep=False)]['title'].unique()
+            for title in dup_titles:
+                print(f"    - {title}")
+        
         df_clean.append(platform_data)
-
-        # Linha de separação (menos na última plataforma)
-        if platform != list(gen.keys())[-1]:
-            print()
     
-    return pd.concat(df_clean, ignore_index=True)
+    resultado = pd.concat(df_clean, ignore_index=True)
+    
+    return resultado
 
 def display_null(df):
     print("Valores nulos em: df_7th_gen\n")
@@ -33,8 +42,8 @@ def display_null(df):
         print(col, df[col].isnull().sum())
     print('\n')
 
-def update_year_of_release(df, year_mapping):
-    for title, year in year_mapping.items():
+def update_year_of_release(df, year_dict):
+    for title, year in year_dict.items():
         idx = df[df['title'] == title].index
         df.loc[idx, 'year_of_release'] = year
 
@@ -43,6 +52,13 @@ def update_year_of_release(df, year_mapping):
 def update_publisher(df, title, publisher):
     idx = df[df['title'] == title].index
     df.loc[idx, 'publisher'] = publisher
+
+def update_esrb_ratings(df, esrb_dict):
+    for game_title, esrb_rating in esrb_dict.items():
+        idx = df[df['title'] == game_title].index
+        df.loc[idx, 'rating'] = esrb_rating
+
+    print(f"Valores nulos restantes em 'rating': {df['rating'].isnull().sum()}")
 
 def get_sales_by_platform_region(df, platform, region):
     sales_by_platform = df.groupby('platform')[[region]].sum()
@@ -55,13 +71,12 @@ def calculate_percentage_sales(total_sales, total_global_sales):
 def count_titles_by_platform(df):
     return df['platform'].value_counts()
 
-def get_console_exclusives_by_year(df, platform, year):
+def get_top_console_titles_by_year(df, platform, year):
     title_counts = df['title'].value_counts()
     exclusives = df[
         (df['platform'] == platform) & 
-        (df['year_of_release'] == year) &
-        (df['title'].map(title_counts) == 1)
-    ][['title', 'genre', 'year_of_release', 'global_sales', 'na_sales', 'jp_sales', 'critic_score', 'user_score']]
+        (df['year_of_release'] == year)
+    ][['title', 'genre', 'year_of_release', 'rating', 'publisher', 'global_sales', 'na_sales', 'jp_sales', 'critic_score', 'user_score']]
     
     exclusives = exclusives.sort_values('global_sales', ascending=False)
     exclusives = exclusives.reset_index(drop=True)
@@ -74,7 +89,7 @@ def get_console_releases_by_year(df, platform, year):
     releases = df[
         (df['platform'] == platform) & 
         (df['year_of_release'] == year)
-    ][['title', 'genre', 'year_of_release', 'global_sales']]
+    ][['title', 'genre', 'publisher', 'rating', 'global_sales', 'na_sales', 'jp_sales']]
     
     releases = releases.sort_values('global_sales', ascending=False)
     releases = releases.reset_index(drop=True)
@@ -90,24 +105,6 @@ def get_top_games_by_platform(df, platform, region_sales):
     console = df[df['platform'] == platform]
     top_games = console.groupby('title')[region_sales].sum().sort_values(ascending=False).head(10)
     return top_games
-
-def display_top_games_by_platform_and_region(df, gen7, regions):
-    for platform, platform_info in gen7.items():
-        console_name = platform_info['console_name']
-        
-        for region in regions:
-            region_name = region_info[region]['region_name']
-            top_games = get_top_games_platform(df, platform, region)
-            
-            titles_info = df[['title', 'publisher', 'developer', 'year_of_release', 'genre', 'rating', 
-                              'critic_score', 'user_score']].drop_duplicates('title')
-            top_games = top_games.reset_index().merge(titles_info, on='title', how='left')
-            
-            top_games.index = range(1, len(top_games) + 1)
-            preposition = region_prepositions.get(region_name, 'em')
-
-            print(f"Top 10 jogos mais vendidos de {console_name} {preposition} {region_name}:")
-            display(top_games)
 
 def shorten_title(title, max_length=40):
     if len(title) > max_length:
@@ -137,20 +134,31 @@ def get_top_publishers_by_region(df, region_sales):
     top_publishers = total_sales.head(10)
     return top_publishers
 
-def display_top_10_games(df, region_sales):
-    for region_sales in region_sales:
+def display_top_10_games(df, region_sales_list):
+    title_metadata = (
+        df
+        .groupby('title', as_index=False)
+        .agg({
+            'publisher': lambda x: x.dropna().mode().iloc[0] if not x.dropna().empty else None,
+            'developer': lambda x: x.dropna().mode().iloc[0] if not x.dropna().empty else None,
+            'genre': lambda x: x.dropna().mode().iloc[0] if not x.dropna().empty else None,
+            'rating': lambda x: x.dropna().mode().iloc[0] if not x.dropna().empty else None,
+        })
+    )
+
+    for region_sales in region_sales_list:
         top_10_games = (
-            df.groupby('title')[region_sales]
-              .sum()
-              .sort_values(ascending=False)
-              .head(10)
-              .reset_index()
+            df
+            .groupby('title')[region_sales]
+            .sum()
+            .sort_values(ascending=False)
+            .head(10)
+            .reset_index()
+            .merge(title_metadata, on='title', how='left')
         )
 
-        titles_info = df[['title', 'publisher', 'developer', 'genre', 'rating', 'critic_score', 'user_score']]
-        top_10_games = top_10_games.merge(titles_info, on='title', how='left')
         top_10_games.index = range(1, len(top_10_games) + 1)
-        
+
         region_name = region_info[region_sales]['region_name']
         preposition = region_prepositions.get(region_name, 'em')
 
@@ -192,7 +200,7 @@ def filter_and_print_top_exclusives(df, gen, regions):
         for region in regions:
             region_name = region_info[region]['region_name']
             top_region_sales = (
-                exclusives[['title', 'year_of_release', region, 'genre', 'rating']]
+                exclusives[['title', 'year_of_release', 'publisher', region, 'genre', 'rating']]
                 .sort_values(by=region, ascending=False)
                 .head(10)
             )
@@ -308,15 +316,164 @@ def group_and_sum_sales_by_rating(df, gen, regions):
 
     return results
 
+load_dotenv(dotenv_path='../.env')
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+
+def get_token():
+    url = "https://id.twitch.tv/oauth2/token"
+    params = {
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+        'grant_type': 'client_credentials'
+    }
+    response = requests.post(url, params=params)
+    return response.json()['access_token'] if response.status_code == 200 else None
+
+def search_years_dict(titles): 
+    token = get_token()
+    if not token:
+        print("Falha ao obter token")
+        return {}
+    
+    url = "https://api.igdb.com/v4/games"
+    headers = {
+        'Client-ID': CLIENT_ID,
+        'Authorization': f'Bearer {token}'
+    }
+    
+    year_dict = {}
+    
+    print(f"Buscando {len(titles)} títulos...\n")
+    
+    for i, title in enumerate(titles, 1):
+        # Busca 3 resultados para ter fallback
+        body = f'fields name, first_release_date; search "{title}"; limit 3;'
+        
+        try:
+            response = requests.post(url, headers=headers, data=body, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if data:
+                    found_year = None
+                    
+                    for game in data:
+                        if game.get('first_release_date'):
+                            try:
+                                year = datetime.fromtimestamp(game['first_release_date']).year
+                                
+                                if 2005 <= year <= 2016:
+                                    found_year = year
+                                    break  # Para no primeiro válido
+                            except:
+                                continue
+                    
+                    if found_year:
+                        year_dict[title] = found_year
+                        print(f"O {i:3d}/{len(titles)}: {title[:30]:30} {found_year}")
+                    else:
+                        if data[0].get('first_release_date'):
+                            try:
+                                bad_year = datetime.fromtimestamp(data[0]['first_release_date']).year
+                                print(f"X {i:3d}/{len(titles)}: {title[:30]:30} {bad_year} (fora de 2005-2016)")
+                            except:
+                                print(f"X {i:3d}/{len(titles)}: {title[:30]:30} Sem ano válido")
+                        else:
+                            print(f"X {i:3d}/{len(titles)}: {title[:30]:30} Sem data")
+                else:
+                    print(f"X {i:3d}/{len(titles)}: {title[:30]:30} Não encontrado")
+            else:
+                print(f"X {i:3d}/{len(titles)}: {title[:30]:30} ERRO {response.status_code}")
+        
+        except Exception as e:
+            print(f"X {i:3d}/{len(titles)}: {title[:30]:30} ERRO: {str(e)[:30]}")
+        
+        time.sleep(0.26)
+    
+    return year_dict
+
+def get_esrb_ratings_igdb(titles):
+    token = get_token()
+    if not token:
+        print("Falha ao obter token")
+        return {}
+    
+    esrb_dict = {}
+    
+    print(f"Buscando classificações ESRB para {len(titles)} títulos...\n")
+    
+    for i, title in enumerate(titles, 1):
+        try:
+            body = f'''
+            fields name, age_ratings.*;
+            search "{title}";
+            limit 3;
+            '''
+            
+            headers = {
+                'Client-ID': CLIENT_ID,
+                'Authorization': f'Bearer {token}'
+            }
+            
+            response = requests.post("https://api.igdb.com/v4/games", 
+                                   headers=headers, data=body, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if data:
+                    esrb_found = None
+                    
+                    for game in data:
+                        if 'age_ratings' in game and game['age_ratings']:
+                            for rating in game['age_ratings']:
+                                # organization 1 = ESRB
+                                if rating.get('organization') == 1:
+                                    rating_category = rating.get('rating_category')
+                                    if rating_category is not None:
+                                        esrb_found = rating_category
+                                        break
+                        
+                        if esrb_found:
+                            break
+                    
+                    if esrb_found is not None:
+                        esrb_text = convert_esrb_code(esrb_found)
+                        
+                        if esrb_text:
+                            esrb_dict[title] = esrb_text
+                            
+                            if esrb_found == 6 and esrb_text == "M":
+                                print(f"O {i:3d}/{len(titles)}: {title[:30]:30} {esrb_text} (AO -> M)")
+                            else:
+                                print(f"O {i:3d}/{len(titles)}: {title[:30]:30} {esrb_text}")
+
+                    else:
+                        print(f"X {i:3d}/{len(titles)}: {title[:30]:30} Sem ESRB")
+                else:
+                    print(f"X {i:3d}/{len(titles)}: {title[:30]:30} Não encontrado")
+            else:
+                print(f"X {i:3d}/{len(titles)}: {title[:30]:30} ERRO {response.status_code}")
+        
+        except Exception as e:
+            print(f"X {i:3d}/{len(titles)}: {title[:30]:30} ERRO: {str(e)[:30]}")
+        
+        time.sleep(0.26)
+    
+    return esrb_dict
 
 
-
-
-
-
-
-
-
-
-
-
+def convert_esrb_code(category):
+    esrb_map = {
+        1: "EC",
+        2: "E", 
+        3: "E10+",
+        4: "T",
+        5: "M",
+        6: "M"
+    }
+    
+    return esrb_map.get(category)
+    

@@ -662,9 +662,9 @@ def plot_top_publishers_by_region(df, region_sales):
         plt.tight_layout()
         plt.show()
 
-def plot_rating_distribution(df, dropna):
+def plot_rating_distribution(df):
     df['rating'] = df['rating'].replace({'EC': 'E'})
-    rating_counts = df['rating'].value_counts(dropna=dropna)
+    rating_counts = df['rating'].value_counts()
     
     plt.figure(figsize=(7, 7))
     wedges, texts, autotexts = plt.pie(
@@ -692,12 +692,12 @@ def plot_rating_distribution(df, dropna):
                title="Classificações", loc="center left", bbox_to_anchor=(1, 0.84))
     plt.show()
 
-def plot_rating_distribution_by_platform(df, gen, dropna):
+def plot_rating_distribution_by_platform(df, gen):
     df['rating'] = df['rating'].replace({'EC': 'E'})
 
     for platform, platform_info in gen.items():
         platform_df = df[df['platform'] == platform]
-        rating_counts = platform_df['rating'].value_counts(dropna=dropna)
+        rating_counts = platform_df['rating'].value_counts()
         
         plt.figure(figsize=(7, 7))
         plt.subplots_adjust(top=5.82)

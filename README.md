@@ -1,24 +1,90 @@
 # Análise de vendas da 7ª geração de videogames
 
 ## Objetivo
-Analisar comparativamente,  as vendas de jogos da sétima geração de consoles (Xbox 360, PlayStation 3 e Nintendo Wii), com foco nos mercados norte-americano e japonês. Explorando como preferências culturais e estratégias corporativas se refletem nos dados de vendas.
 
-## Estrutura da Análise
+Este projeto analisa comparativamente as vendas de jogos da sétima geração de consoles (Xbox 360, PlayStation 3 e Nintendo Wii), com foco nos mercados norte-americano e japonês.
 
-### Parte 1 – Contexto histórico e panorama geral
-- Comparação de vendas entre gerações (5ª, 6ª e 7ª)
-- Introdução e tendência da 7ª geração
+A análise investiga como diferenças culturais regionais e estratégias corporativas influenciaram o desempenho comercial das plataformas ao longo da geração.
 
-### Parte 2 – Análise comparativa entre mercados
-- Diferenças entre as regiões da América do Norte e Japão
-- Comparação de vendas entre plataformas
-- Preferências por gêneros, publishers
-- Impacto de exclusivos por plataforma
+---
+
+## Preparação e tratamento dos dados
+
+### Títulos duplicados e registros redundantes
+
+O dataset original continha tanto duplicatas completas quanto entradas redundantes resultantes da fragmentação de vendas regionais.
+
+Esses casos foram tratados por meio da padronização dos títulos e posterior agregação por `title` e `platform`, somando as vendas regionais e consolidando os metadados associados. O processo completo de identificação e consolidação está documentado no notebook.
+
+### Valores nulos e classificação etária
+A API da IGDB (Internet Game Database) foi utilizada para auxiliar na obtenção e validação de informações ausentes nas colunas `year_of_release` e `rating`.
+
+Boa parte das ausências restantes na coluna `rating` refletem diferenças entre os sistemas de classificação etária ocidentais (ESRB) e japoneses (CERO), comuns em títulos voltados prioritariamente ao mercado japonês. Esses registros foram mantidos na análise e tratados como uma categoria própria.
+
+---
+
+## Estrutura da análise
+
+A análise foi organizada em dois eixos principais:
+
+### 1. Estrutura competitiva da 7ª geração
+- Evolução do mercado ao longo das gerações (5ª, 6ª e 7ª)
+- Estratégias de lançamento inicial por plataforma
+- Exclusividade temporária e dinâmica dos títulos multiplataforma
+
+### 2. Diferenças regionais de consumo
+- Contraste entre os mercados norte-americano e japonês
+- Comparação de desempenho entre plataformas
+- Preferências por gêneros e publishers
+- Impacto dos exclusivos no desempenho regional
 - Distribuição por classificação etária
 
-## Tecnologias utilizadas
-- **Linguagem:** Python 3.12  
-- **Bibliotecas principais:** pandas, matplotlib, seaborn
+---
+
+## Breve contexto histórico
+
+A 7ª geração representou uma ruptura no domínio histórico da Sony observado nas duas gerações anteriores.  
+
+Enquanto o PlayStation manteve forte presença no Japão, o Xbox 360 conquistou o mercado norte-americano.  
+
+A Nintendo, por sua vez, redefiniu o mercado ao priorizar acessibilidade e experiências first-party, e manteve forte presença em ambos os mercados.
+
+---
+
+## Destaque analítico: exclusividade temporária no Xbox 360
+
+O Xbox 360 obteve de forma sistemática a **exclusividade temporária**, sendo muitas vezes a primeira plataforma a receber títulos multiplataforma relevantes.
+
+A análise dos dados mostra que jogos lançados inicialmente no Xbox 360 — e apenas posteriormente no PS3 — tendem a apresentar **vendas globais superiores na plataforma da Microsoft**, mesmo após a chegada das versões concorrentes.
+
+Casos emblemáticos incluem:
+- *The Elder Scrolls IV: Oblivion*
+- *BioShock*
+- *Mass Effect 2*
+- *Minecraft*
+
+---
+
+## Principais resultados da análise de mercado  
+*Com ênfase nos mercados norte-americano e japonês*
+
+### Mercado norte-americano
+- Predomínio de gêneros como shooters, esportes e ação
+- Forte presença de publishers ocidentais
+- Liderança consistente do Xbox 360
+
+### Mercado japonês
+- Alta concentração de JRPGs e títulos de publishers japonesas
+- Melhor desempenho relativo do PlayStation 3 e do Wii
+- Baixa penetração do Xbox 360, mesmo em títulos multiplataforma
+
+### Performance por plataforma
+- **Xbox 360:** hegemonia no mercado norte-americano, foco em público hardcore, relevância marginal no Japão  
+- **PlayStation 3:** desempenho mais equilibrado, com vantagem no Japão sustentada por títulos first-party e JRPGs  
+- **Nintendo Wii:** sucesso global impulsionado por exclusivos first-party e apelo casual/familiar
+
+### Diferenças intragênero
+Mesmo em gêneros populares em ambas as regiões, observam-se diferenças significativas de desempenho, indicando que preferências culturais influenciam não apenas o gênero consumido, mas também o tipo de experiência valorizada.
 
 ## Estrutura do projeto
 
@@ -31,56 +97,22 @@ videogames_sales/
 │ ├── visualization.py
 │ └── constants.py
 ├── notebooks/
-│ └── videogame_sales.ipynb
+│ └── videogames_sales.ipynb
 └── README.md
 ```
 
-## Principais resultados
-
-### Domínio da Sony nas duas gerações anteriores
-Por duas gerações (5ª e 6ª), a Sony dominou o mercado sem que nenhum concorrente chegasse perto.
-
-### 7ª geração - A ascenção da Microsoft
-O panorama mudou na 7ª geração. Embora a Sony tenha mantido sua hegemonia nos mercados japonês e europeu, a Microsoft com seu segundo colsole - Xbox 360 — conseguiu desbancar o domínio de vendas de títulos do Playstation no mercado norte-americano, que acabou também sendo ultrapassado pela Nintendo neste mercado e amargou a lanterna das vendas.
-
-## Características da geração
-
-- Exclusividade temporária de títulos do Xbox 360
-- Perda de títulos multiplataformas no Wii.
-
-## Tendências
-### Jogos de ritmo
-As séries Guitar Hero e Rock Band tiveram vendas impressionantes (mais de 60 milhões de cópias vendidas no mercado global), com 23 títulos lançados.
-
-### Franquia Call of Duty
-Com destaque para as séries Modern Warfare e Black Ops. No total, a franquia vendeu mais de 183,69 milhões de cópias no mercado de consoles domésticos desta geração.
-
-### Jogos de mundo aberto
-Títulos como Fallout 3 (2008), Assassin's Creed 2 (2009), Red Dead Redemption e Fallout: New Vegas em 2010, Batman: Arkham City e The Elder Scrolls V: Skyrim em 2011, e Far Cry 3 (2012) alcançaram sucesso crítico e comercial.
-
-## Análise de Mercado da 7ª geração
-
-### Mercado norte-americano
-- Predomínio de ação, esportes e shooters  
-- Publishers ocidentais dominaram  
-- Xbox 360 liderou as vendas  
-
-### Mercado japonês
-- Forte apelo de RPGs japoneses  
-- Publishers japonesas dominaram  
-- PS3 e Wii tiveram melhor desempenho  
-
-### Performance por plataforma
-- **Xbox 360:** hegemonia no NA, foco em público hardcore, quase irrelevante no JP  
-- **PlayStation 3:** equilíbrio, com destaque no Japão graças aos JRPGs  
-- **Nintendo Wii:** sucesso global, dominando o público casual e familiar
-
-### Diferenças intrigênero  
-- Preferências distintas de cada mercado mesmo em gêneros populares em ambas regiões.
+---
 
 ## Lições aprendidas
-- Prática extensiva das bibliotecas Pandas e Matplot
-- Estruturação de análise de dados e prática de storytelling
+
+- A importância de tratar ausência de dados como informação contextual, e não necessariamente como erro
+  (ex.: distinção entre sistemas ESRB e CERO em mercados distintos).
+
+- Definição operacional de “exclusividade temporária” a partir de dados de lançamento, em vez de rótulos de marketing.
+
+- Construção de comparações regionais evitando agregações globais que mascaram diferenças culturais relevantes.
+
+---
 
 ## Como reproduzir
 
@@ -97,6 +129,7 @@ pip install -r requirements.txt
 
 ### 3. Execute videogames_sales.ipynb na pasta `notebook/` para reproduzir os experimentos.
 
+
+## Contato
 > Desenvolvido por Bruno Casini  
-> Contato: kzini1701@gmail.com  
-> LinkedIn: www.linkedin.com/in/kzini
+> LinkedIn: https://www.linkedin.com/in/kzini
